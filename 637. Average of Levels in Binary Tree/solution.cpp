@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <queue>
 #include <unordered_map>
 #include <vector>
 
@@ -16,29 +17,30 @@ struct TreeNode {
 
 class Solution {
 public:
-  void visitAndAccumulate(
-      TreeNode *tree, unsigned depth,
-      std::unordered_map<unsigned, std::vector<double>> &levelAndMaxVal) {
-    if (!tree) {
-      return;
-    }
-    levelAndMaxVal[depth].push_back(tree->val);
-    visitAndAccumulate(tree->left, depth + 1, levelAndMaxVal);
-    visitAndAccumulate(tree->right, depth + 1, levelAndMaxVal);
-  }
-
   vector<double> averageOfLevels(TreeNode *root) {
-    std::unordered_map<unsigned, std::vector<double>> levelAndMaxVal;
-    visitAndAccumulate(root, 0u, levelAndMaxVal);
+    if (!root) {
+      return {};
+    }
 
     std::vector<double> result;
-    result.reserve(levelAndMaxVal.size());
-    for (unsigned i = 0; i < levelAndMaxVal.size(); i++) {
-      double avg = 0;
-      for (double val : levelAndMaxVal[i]) {
-        avg += val;
+    std::queue<TreeNode *> q;
+    q.push(root);
+
+    while (!q.empty()) {
+      long n = q.size();
+      long acc = 0;
+
+      for (unsigned i = 0; i < n; i++) {
+        TreeNode *node = q.front();
+        q.pop();
+        acc += node->val;
+        if (node->left)
+          q.push(node->left);
+        if (node->right)
+          q.push(node->right);
       }
-      result.push_back(avg / levelAndMaxVal[i].size());
+
+      result.push_back(static_cast<double>(acc) / n);
     }
 
     return result;
